@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#153d2b">
+  <title>Usina São Lucas | Gestão</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <section id="login-screen" class="login-wrap">
+    <div class="login-card">
+      <div class="brand-mark">SL</div>
+      <p class="eyebrow">SISTEMA DE GESTÃO</p>
+      <h1>Usina São Lucas</h1>
+      <p class="muted">Produção • Estoque • Financeiro</p>
+      <form id="login-form">
+        <label for="username">Usuário</label>
+        <input id="username" autocomplete="username" placeholder="Digite seu usuário" value="martins" required>
+        <label for="password">Senha</label>
+        <input id="password" type="password" autocomplete="current-password" placeholder="Digite sua senha" required>
+        <button class="primary full" type="submit">Entrar no sistema</button>
+        <p id="login-message" class="form-message"></p>
+      </form>
+      <p class="tiny">O banco de dados online precisa ser configurado seguindo o README.</p>
+    </div>
+  </section>
+
+  <div id="app-screen" class="app-shell hidden">
+    <aside class="sidebar">
+      <div class="sidebar-brand"><div class="brand-mark small">SL</div><div><strong>Usina São Lucas</strong><small>Gestão empresarial</small></div></div>
+      <nav>
+        <button class="nav-item active" data-page="dashboard">▦ <span>Visão geral</span></button>
+        <button class="nav-item" data-page="production">▤ <span>Produção</span></button>
+        <button class="nav-item" data-page="inventory">▣ <span>Estoque</span></button>
+        <button class="nav-item" data-page="sales">▧ <span>Vendas e despesas</span></button>
+        <button class="nav-item" data-page="reports">▥ <span>Relatórios</span></button>
+      </nav>
+      <div class="sidebar-bottom"><span class="status-dot"></span> Dados sincronizados quando conectado<button id="logout-btn" class="logout">Sair da conta ↗</button></div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar"><div><p class="eyebrow">PAINEL DE CONTROLE</p><h2 id="page-title">Visão geral</h2></div><div class="top-actions"><span id="today-label"></span><span class="avatar">M</span></div></header>
+      <div id="connection-notice" class="notice">Modo de demonstração: configure o Supabase para salvar e sincronizar os dados online.</div>
+
+      <section id="page-dashboard" class="page">
+        <div class="welcome"><div><p class="eyebrow light">BEM-VINDO AO SISTEMA</p><h1>Controle sua operação<br>em um só lugar.</h1><p>Acompanhe produção, estoque e movimentações da usina.</p></div><div class="rice-art">🌾</div></div>
+        <div class="section-heading"><div><h3>Resumo do mês</h3><p>Indicadores registrados neste mês</p></div><input id="dashboard-month" type="month"></div>
+        <div class="stats-grid">
+          <article class="stat-card"><span class="stat-icon green">▤</span><p>Produção registrada</p><strong id="stat-production">0 kg</strong><small id="stat-production-sub">Total do mês</small></article>
+          <article class="stat-card"><span class="stat-icon gold">▣</span><p>Itens em estoque</p><strong id="stat-stock">0</strong><small>Tipos de item cadastrados</small></article>
+          <article class="stat-card"><span class="stat-icon blue">↗</span><p>Vendas do mês</p><strong id="stat-sales">R$ 0,00</strong><small>Movimentações registradas</small></article>
+          <article class="stat-card"><span class="stat-icon red">↘</span><p>Despesas do mês</p><strong id="stat-expenses">R$ 0,00</strong><small>Movimentações registradas</small></article>
+        </div>
+        <div class="content-grid"><article class="panel"><div class="panel-heading"><div><h3>Produção recente</h3><p>Últimos registros adicionados</p></div><button class="text-button" data-goto="production">Ver produção →</button></div><div id="recent-production" class="empty-state">Nenhuma produção registrada ainda.</div></article>
+        <article class="panel"><div class="panel-heading"><div><h3>Estoque baixo</h3><p>Itens que precisam de atenção</p></div><button class="text-button" data-goto="inventory">Ver estoque →</button></div><div id="low-stock" class="empty-state">Nenhum item cadastrado.</div></article></div>
+      </section>
+
+      <section id="page-production" class="page hidden">
+        <div class="section-heading"><div><h3>Registro de produção</h3><p>Registre o volume produzido ou beneficiado por dia.</p></div><button id="new-production-btn" class="primary">＋ Novo registro</button></div>
+        <div id="production-form-wrap" class="panel form-panel hidden"><h3>Novo registro de produção</h3><form id="production-form" class="form-grid">
+          <div><label>Data</label><input id="prod-date" type="date" required></div><div><label>Etapa / produto</label><select id="prod-type"><option>Arroz em casca recebido</option><option>Arroz beneficiado</option><option>Arroz embalado</option><option>Outros</option></select></div>
+          <div><label>Quantidade (kg)</label><input id="prod-quantity" type="number" min="0.01" step="0.01" required placeholder="Ex.: 1250"></div><div><label>Meta do dia (kg)</label><input id="prod-goal" type="number" min="0" step="0.01" placeholder="Opcional"></div>
+          <div class="span-2"><label>Observações</label><input id="prod-notes" placeholder="Turno, lote, perdas ou observações"></div>
+          <div class="span-2 form-actions"><button type="button" id="cancel-production" class="secondary">Cancelar</button><button class="primary" type="submit">Salvar registro</button></div>
+        </form></div>
+        <article class="panel"><div class="table-toolbar"><input id="production-search" placeholder="Buscar por etapa ou observação..."><input id="production-filter" type="month"></div><div class="table-scroll"><table><thead><tr><th>Data</th><th>Etapa / produto</th><th>Quantidade</th><th>Meta</th><th>Observações</th><th></th></tr></thead><tbody id="production-table"></tbody></table></div><p id="production-empty" class="empty-state">Nenhum registro encontrado.</p></article>
+      </section>
+
+      <section id="page-inventory" class="page hidden">
+        <div class="section-heading"><div><h3>Estoque e mercadorias</h3><p>Controle matéria-prima, produto beneficiado e embalagens.</p></div><button id="new-stock-btn" class="primary">＋ Cadastrar item</button></div>
+        <div id="stock-form-wrap" class="panel form-panel hidden"><h3>Cadastrar item no estoque</h3><form id="stock-form" class="form-grid">
+          <div><label>Nome do item</label><input id="stock-name" required placeholder="Ex.: Arroz beneficiado tipo 1"></div><div><label>Categoria</label><select id="stock-category"><option>Matéria-prima</option><option>Produto acabado</option><option>Embalagem</option><option>Insumo</option><option>Outro</option></select></div>
+          <div><label>Quantidade atual (kg/un.)</label><input id="stock-quantity" type="number" min="0" step="0.01" required></div><div><label>Alerta de estoque baixo</label><input id="stock-minimum" type="number" min="0" step="0.01" value="10" required></div>
+          <div><label>Custo unitário (R$)</label><input id="stock-cost" type="number" min="0" step="0.01" value="0"></div><div><label>Unidade</label><select id="stock-unit"><option>kg</option><option>saca</option><option>unidade</option><option>pacote</option><option>litro</option></select></div>
+          <div class="span-2 form-actions"><button type="button" id="cancel-stock" class="secondary">Cancelar</button><button class="primary" type="submit">Salvar item</button></div>
+        </form></div>
+        <article class="panel"><div class="table-toolbar"><input id="stock-search" placeholder="Buscar item..."><span id="stock-count" class="muted"></span></div><div class="table-scroll"><table><thead><tr><th>Item</th><th>Categoria</th><th>Quantidade</th><th>Alerta mínimo</th><th>Custo unitário</th><th>Status</th><th></th></tr></thead><tbody id="stock-table"></tbody></table></div><p id="stock-empty" class="empty-state">Nenhum item cadastrado.</p></article>
+      </section>
+
+      <section id="page-sales" class="page hidden">
+        <div class="section-heading"><div><h3>Vendas e despesas</h3><p>Registre entradas e saídas financeiras.</p></div><button id="new-transaction-btn" class="primary">＋ Nova movimentação</button></div>
+        <div id="transaction-form-wrap" class="panel form-panel hidden"><h3>Nova movimentação</h3><form id="transaction-form" class="form-grid">
+          <div><label>Tipo</label><select id="transaction-type"><option value="sale">Venda / receita</option><option value="expense">Despesa</option></select></div><div><label>Data</label><input id="transaction-date" type="date" required></div>
+          <div><label>Descrição</label><input id="transaction-description" required placeholder="Ex.: Venda de 50 sacas"></div><div><label>Valor (R$)</label><input id="transaction-amount" type="number" min="0.01" step="0.01" required></div>
+          <div class="span-2 form-actions"><button type="button" id="cancel-transaction" class="secondary">Cancelar</button><button class="primary" type="submit">Salvar movimentação</button></div>
+        </form></div>
+        <article class="panel"><div class="table-toolbar"><input id="transaction-search" placeholder="Buscar movimentação..."><input id="transaction-filter" type="month"></div><div class="table-scroll"><table><thead><tr><th>Data</th><th>Tipo</th><th>Descrição</th><th>Valor</th><th></th></tr></thead><tbody id="transaction-table"></tbody></table></div><p id="transaction-empty" class="empty-state">Nenhuma movimentação encontrada.</p></article>
+      </section>
+
+      <section id="page-reports" class="page hidden">
+        <div class="section-heading"><div><h3>Relatórios mensais</h3><p>Resumo de produção e movimentações por mês.</p></div><input id="report-month" type="month"></div>
+        <div class="stats-grid report-stats"><article class="stat-card"><p>Produção total</p><strong id="report-production">0 kg</strong></article><article class="stat-card"><p>Metas registradas</p><strong id="report-goal">0 kg</strong></article><article class="stat-card"><p>Receitas</p><strong id="report-sales">R$ 0,00</strong></article><article class="stat-card"><p>Despesas</p><strong id="report-expenses">R$ 0,00</strong></article></div>
+        <article class="panel report-panel"><div class="panel-heading"><div><h3>Desempenho da produção</h3><p>Produção registrada em comparação com as metas informadas.</p></div><button id="export-btn" class="secondary">Exportar CSV</button></div><div class="progress-track"><div id="goal-progress" class="progress-fill"></div></div><p id="goal-progress-label" class="muted">Nenhuma meta informada neste mês.</p><p class="tiny">Os relatórios refletem os registros cadastrados no sistema. Confira os dados antes de usar para decisões contábeis.</p></article>
+      </section>
+      <footer>Usina São Lucas <span>•</span> Sistema de Gestão</footer>
+    </main>
+  </div>
+  <div id="toast" class="toast" role="status"></div>
+  <script src="app.js"></script>
+</body>
+</html>
